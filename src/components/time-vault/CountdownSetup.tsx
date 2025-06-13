@@ -17,67 +17,95 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
   const [minutes, setMinutes] = useState(5); // Default to 5 minutes
   const [seconds, setSeconds] = useState(0);
   const [calculatedCost, setCalculatedCost] = useState(0);
-  const [kshInput, setKshInput] = useState("10"); // Initial cost for 5 minutes
+  const [kshInput, setKshInput] = useState("10.00"); // Initial cost for 5 minutes, formatted
 
-  // Effect to update cost and kshInput when time (h, m, s) changes
+  // Effect to update calculatedCost when time (h, m, s) changes
   useEffect(() => {
     const totalSecondsValue = hours * 3600 + minutes * 60 + seconds;
-    let newCost = 0;
+    let newBlockCost = 0;
     if (totalSecondsValue > 0) {
       const twentyMinuteBlocks = Math.ceil(totalSecondsValue / (20 * 60));
-      newCost = twentyMinuteBlocks * 10;
+      newBlockCost = twentyMinuteBlocks * 10;
     }
-    setCalculatedCost(newCost);
-    // Update kshInput based on the new cost derived from time.
-    // React's setState skips re-render if value is same, preventing loops.
-    setKshInput(newCost.toString());
+    setCalculatedCost(newBlockCost);
   }, [hours, minutes, seconds]);
 
+  // Effect to initialize kshInput based on default time
+  useEffect(() => {
+    const initialTotalSeconds = hours * 3600 + minutes * 60 + seconds;
+    if (initialTotalSeconds > 0) {
+      const initialEquivalentKsh = initialTotalSeconds / 120; // 1 Ksh = 2 minutes = 120 seconds
+      setKshInput(initialEquivalentKsh.toFixed(2));
+      
+      const twentyMinuteBlocks = Math.ceil(initialTotalSeconds / (20 * 60));
+      setCalculatedCost(twentyMinuteBlocks * 10);
+    } else {
+      setKshInput("0.00");
+      setCalculatedCost(0);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only on mount to set initial kshInput from default time
+
+
   const handleKshInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setKshInput(value); // Update kshInput to reflect user's typing immediately
+    const inputValue = e.target.value;
+    setKshInput(inputValue); // Set state to exactly what user typed
 
-    if (value === "") {
-      setHours(0);
-      setMinutes(0);
-      setSeconds(0);
-      // useEffect for [h,m,s] will set calculatedCost to 0 and kshInput to "0"
+    if (inputValue.trim() === "" || inputValue === ".") {
+      // Allow user to clear input or start typing a decimal
+      // If cleared, reset time. If just ".", wait for more input.
+      if (inputValue.trim() === "") {
+        setHours(0); setMinutes(0); setSeconds(0);
+      }
       return;
     }
 
-    const amountNum = parseFloat(value);
+    const amountNum = parseFloat(inputValue);
 
-    // If not a positive number, reset time.
-    // This will trigger useEffect to set cost to 0 and kshInput to "0".
-    if (isNaN(amountNum) || amountNum <= 0) {
-      setHours(0);
-      setMinutes(0);
-      setSeconds(0);
+    if (isNaN(amountNum) || amountNum < 0) {
+      setHours(0); setMinutes(0); setSeconds(0);
       return;
     }
+    
+    const cappedAmount = Math.min(amountNum, 10000); // Cap Ksh input reasonably
 
-    // Valid positive number: Calculate time from Ksh amount (Ksh 1 = 2 minutes)
-    const totalFocusSeconds = amountNum * 2 * 60;
+    const totalFocusSeconds = cappedAmount * 2 * 60; // Ksh 1 = 2 minutes
     
     let newH = Math.floor(totalFocusSeconds / 3600);
     let newM = Math.floor((totalFocusSeconds % 3600) / 60);
-    let newS = Math.round(totalFocusSeconds % 60); // Round seconds
+    let newS = Math.round(totalFocusSeconds % 60); 
 
-    // Cap time at 23:59:59 for sanity, aligning with H input max.
-    if (newH >= 24) {
-        newH = 23;
-        newM = 59;
-        newS = 59;
+    const maxTotalSeconds = (23 * 3600) + (59 * 60) + 59;
+    if (newH * 3600 + newM * 60 + newS > maxTotalSeconds) {
+        newH = 23; newM = 59; newS = 59;
     }
 
     setHours(newH);
     setMinutes(newM);
     setSeconds(newS);
-    // The useEffect for [hours, minutes, seconds] will then run,
-    // recalculate the cost based on this new time, and update
-    // `calculatedCost` and `kshInput` (e.g., if user typed Ksh 7.5,
-    // time becomes 15min, block cost is Ksh 10, so kshInput becomes "10").
   };
+
+  const handleTimeInputChange = (
+    unit: 'h' | 'm' | 's',
+    newValue: number
+  ) => {
+    let currentH = hours;
+    let currentM = minutes;
+    let currentS = seconds;
+
+    if (unit === 'h') currentH = newValue;
+    else if (unit === 'm') currentM = newValue;
+    else if (unit === 's') currentS = newValue;
+    
+    setHours(currentH);
+    setMinutes(currentM);
+    setSeconds(currentS);
+
+    const newTotalSeconds = currentH * 3600 + currentM * 60 + currentS;
+    const equivalentRawKsh = newTotalSeconds / 120; // 1 Ksh = 2 minutes = 120 seconds
+    setKshInput(equivalentRawKsh.toFixed(2));
+  };
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,7 +120,7 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
   const createTimeInput = (
     label: string,
     value: number,
-    setValue: (val: number) => void,
+    unit: 'h' | 'm' | 's',
     max: number,
     min: number = 0
   ) => (
@@ -101,12 +129,12 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
       <Input
         id={label.toLowerCase()}
         type="number"
-        value={value.toString()} // Input expects string value
+        value={value.toString()} 
         onChange={(e) => {
           let val = parseInt(e.target.value, 10);
-          if (isNaN(val)) val = min; // Default to min if parsing fails
+          if (isNaN(val)) val = min; 
           val = Math.max(min, Math.min(max, val));
-          setValue(val);
+          handleTimeInputChange(unit, val);
         }}
         min={min}
         max={max}
@@ -122,9 +150,9 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
       </p>
       
       <div className="grid grid-cols-3 gap-3 sm:gap-4">
-        {createTimeInput("Hours", hours, setHours, 23)}
-        {createTimeInput("Minutes", minutes, setMinutes, 59)}
-        {createTimeInput("Seconds", seconds, setSeconds, 59)}
+        {createTimeInput("Hours", hours, 'h', 23)}
+        {createTimeInput("Minutes", minutes, 'm', 59)}
+        {createTimeInput("Seconds", seconds, 's', 59)}
       </div>
 
       <div className="flex flex-col space-y-1.5">
@@ -137,13 +165,13 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
           placeholder="e.g. 10.00"
           className="text-center text-2xl h-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           min="0"
-          step="0.01"
+          step="0.01" // Allows decimal input
         />
       </div>
       
       <div className="text-center p-3 bg-secondary/50 rounded-md border border-secondary">
         <p className="text-sm font-medium text-secondary-foreground">Effective cost for this duration</p>
-        <p className="text-2xl font-semibold text-primary">Ksh {calculatedCost}</p>
+        <p className="text-2xl font-semibold text-primary">Ksh {calculatedCost.toFixed(2)}</p>
         <p className="text-xs text-muted-foreground mt-1">Billing: Ksh 10 per 20 mins (or part thereof).</p>
       </div>
       
@@ -156,3 +184,4 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
 };
 
 export default CountdownSetup;
+
