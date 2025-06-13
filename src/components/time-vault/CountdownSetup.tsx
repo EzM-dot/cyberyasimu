@@ -19,7 +19,6 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
   const [calculatedCost, setCalculatedCost] = useState(0);
   const [kshInput, setKshInput] = useState("0.00"); 
 
-  // Effect to update calculatedCost when time (h, m, s) changes
   useEffect(() => {
     const totalSecondsValue = hours * 3600 + minutes * 60 + seconds;
     let newBlockCost = 0;
@@ -30,25 +29,19 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
     setCalculatedCost(newBlockCost);
   }, [hours, minutes, seconds]);
 
-  // Effect to initialize kshInput and calculatedCost based on default time
   useEffect(() => {
-    // Default time is already set by useState: hours(0), minutes(5), seconds(0)
-    const initialTotalSeconds = hours * 3600 + minutes * 60 + seconds;
+    const initialTotalSeconds = 0 * 3600 + 5 * 60 + 0 * seconds; // Corresponds to initial state: hours(0), minutes(5), seconds(0)
     
     if (initialTotalSeconds > 0) {
-      const rawEquivalentKsh = initialTotalSeconds / 120;
+      const rawEquivalentKsh = initialTotalSeconds / 120; // Ksh 1 = 2 mins = 120 secs
       const twentyMinuteBlocks = Math.ceil(initialTotalSeconds / (20 * 60));
       const effectiveCost = twentyMinuteBlocks * 10;
 
       setCalculatedCost(effectiveCost);
 
-      // If the effective cost for the default time is the minimum (10), 
-      // and the raw ksh equivalent is less than 10, display 10.00 in kshInput.
-      // This makes the initial display consistent with the minimum charge.
       if (effectiveCost === 10 && rawEquivalentKsh < 10) {
         setKshInput("10.00");
       } else {
-        // Otherwise, kshInput shows the raw Ksh equivalent of the default time
         setKshInput(rawEquivalentKsh.toFixed(2));
       }
     } else {
@@ -56,44 +49,61 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
       setCalculatedCost(0);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only on mount to set initial kshInput and cost from default time
+  }, []);
 
 
   const handleKshInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
-    setKshInput(inputValue); 
+    const currentValue = e.target.value;
 
-    if (inputValue.trim() === "" || inputValue === ".") {
-      if (inputValue.trim() === "") {
-        setHours(0); setMinutes(0); setSeconds(0);
-      }
-      return;
-    }
+    // Regex allows: empty string, "0", "123", "0.1", "123.45", "123." (intermediate typing)
+    // Rejects: "123.456" (more than 2 decimal places), "abc", "1.2.3" (invalid number formats)
+    // Allows leading zero only if it's "0" or "0.xx"
+    const strictPattern = /^(0|[1-9]\d*)(\.\d{0,2})?$/; 
+    const intermediatePattern = /^(0|[1-9]\d*)\.$/; // Allows "123."
+    const isEmpty = currentValue === "";
 
-    const amountNum = parseFloat(inputValue);
+    if (isEmpty || strictPattern.test(currentValue) || intermediatePattern.test(currentValue)) {
+        setKshInput(currentValue);
 
-    if (isNaN(amountNum) || amountNum < 0) {
-      setHours(0); setMinutes(0); setSeconds(0);
-      return;
-    }
-    
-    const cappedAmount = Math.min(amountNum, 10000); 
+        // If the input is empty or just a number ending with a dot (incomplete for calculation)
+        if (currentValue === "" || currentValue.endsWith('.')) {
+            if (currentValue === "") {
+                setHours(0);
+                setMinutes(0);
+                setSeconds(0);
+            }
+            // For "number." or just ".", don't calculate time yet
+            return;
+        }
 
-    const totalFocusSeconds = cappedAmount * 2 * 60; 
-    
-    let newH = Math.floor(totalFocusSeconds / 3600);
-    let newM = Math.floor((totalFocusSeconds % 3600) / 60);
-    let newS = Math.round(totalFocusSeconds % 60); 
+        const amountNum = parseFloat(currentValue);
 
-    const maxTotalSeconds = (23 * 3600) + (59 * 60) + 59;
-    if (newH * 3600 + newM * 60 + newS > maxTotalSeconds) {
-        newH = 23; newM = 59; newS = 59;
-    }
+        if (isNaN(amountNum) || amountNum < 0) { 
+            setHours(0); setMinutes(0); setSeconds(0);
+            return;
+        }
+        
+        const cappedAmount = Math.min(amountNum, 10000); // Cap at Ksh 10,000
+        const totalFocusSeconds = cappedAmount * 2 * 60; // Ksh 1 = 2 minutes = 120 seconds
+        
+        let newH = Math.floor(totalFocusSeconds / 3600);
+        let newM = Math.floor((totalFocusSeconds % 3600) / 60);
+        let newS = Math.round(totalFocusSeconds % 60); // Round seconds
 
-    setHours(newH);
-    setMinutes(newM);
-    setSeconds(newS);
+        const maxTotalSeconds = (23 * 3600) + (59 * 60) + 59; // Max time: 23h 59m 59s
+        if (newH * 3600 + newM * 60 + newS > maxTotalSeconds) {
+            newH = 23; newM = 59; newS = 59;
+        }
+
+        setHours(newH);
+        setMinutes(newM);
+        setSeconds(newS);
+
+    } 
+    // Else: input is invalid (e.g. "12.345", "abc"), do nothing.
+    // The input field will not update because setKshInput was not called with the invalid value.
   };
+
 
   const handleTimeInputChange = (
     unit: 'h' | 'm' | 's',
@@ -116,10 +126,8 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
     setSeconds(currentS);
 
     const newTotalSeconds = currentH * 3600 + currentM * 60 + currentS;
-    // When time changes, update kshInput to reflect the raw equivalent Ksh for that time.
-    // The calculatedCost field will show the actual block-based billing.
     if (newTotalSeconds > 0) {
-        const equivalentRawKsh = newTotalSeconds / 120; 
+        const equivalentRawKsh = newTotalSeconds / 120; // Ksh 1 = 2 mins
         setKshInput(equivalentRawKsh.toFixed(2));
     } else {
         setKshInput("0.00");
@@ -131,16 +139,14 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
     e.preventDefault();
     const totalSecondsValue = hours * 3600 + minutes * 60 + seconds;
     if (totalSecondsValue <= 0) {
-      alert("Please set a duration greater than 0 seconds, or an amount greater than Ksh 0.");
+      alert("Please set a duration greater than 0 seconds, or an amount that results in a cost of at least Ksh 10.00.");
       return;
     }
-    // The calculatedCost already reflects the Ksh 10 minimum if any time is set.
-    // The min="10.00" on kshInput helps with form validation.
-    // We can ensure that if kshInput is explicitly set below 10 by the user,
-    // but time is > 0, the submission still respects calculatedCost.
-    // The current logic already handles this as onTimeSet uses totalSecondsValue
-    // and calculatedCost determines the billing.
-
+    // Ensure calculatedCost meets minimum if time is set
+    if (calculatedCost < 10 && totalSecondsValue > 0) {
+      alert("The minimum charge is Ksh 10.00 for any active timer.");
+      return;
+    }
     onTimeSet(totalSecondsValue);
   };
 
@@ -186,13 +192,13 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
         <Label htmlFor="ksh-amount" className="text-sm font-medium text-muted-foreground">Amount (Ksh)</Label>
         <Input
           id="ksh-amount"
-          type="number"
+          type="text" // Change to text to allow more control with regex, browser number spinners can be an issue
+          inputMode="decimal" // Hint for mobile keyboards
           value={kshInput}
           onChange={handleKshInputChange}
           placeholder="e.g. 10.00"
           className="text-center text-2xl h-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-          min="10.00" 
-          step="0.01" 
+          min="10.00" // Still useful for semantic and some browser cues, though regex is primary
         />
       </div>
       
@@ -211,5 +217,3 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
 };
 
 export default CountdownSetup;
-
-    
