@@ -17,7 +17,7 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
   const [minutes, setMinutes] = useState(5); // Default to 5 minutes
   const [seconds, setSeconds] = useState(0);
   const [calculatedCost, setCalculatedCost] = useState(0);
-  const [kshInput, setKshInput] = useState("10.00"); // Initial cost for 5 minutes, formatted
+  const [kshInput, setKshInput] = useState("10.00"); 
 
   // Effect to update calculatedCost when time (h, m, s) changes
   useEffect(() => {
@@ -40,8 +40,8 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
       const twentyMinuteBlocks = Math.ceil(initialTotalSeconds / (20 * 60));
       setCalculatedCost(twentyMinuteBlocks * 10);
     } else {
-      setKshInput("0.00");
-      setCalculatedCost(0);
+      setKshInput("0.00"); // Or "10.00" if 0 time implies min charge
+      setCalculatedCost(0); // Or 10
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Run only on mount to set initial kshInput from default time
@@ -49,11 +49,9 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
 
   const handleKshInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
-    setKshInput(inputValue); // Set state to exactly what user typed
+    setKshInput(inputValue); 
 
     if (inputValue.trim() === "" || inputValue === ".") {
-      // Allow user to clear input or start typing a decimal
-      // If cleared, reset time. If just ".", wait for more input.
       if (inputValue.trim() === "") {
         setHours(0); setMinutes(0); setSeconds(0);
       }
@@ -67,9 +65,9 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
       return;
     }
     
-    const cappedAmount = Math.min(amountNum, 10000); // Cap Ksh input reasonably
+    const cappedAmount = Math.min(amountNum, 10000); 
 
-    const totalFocusSeconds = cappedAmount * 2 * 60; // Ksh 1 = 2 minutes
+    const totalFocusSeconds = cappedAmount * 2 * 60; 
     
     let newH = Math.floor(totalFocusSeconds / 3600);
     let newM = Math.floor((totalFocusSeconds % 3600) / 60);
@@ -97,12 +95,17 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
     else if (unit === 'm') currentM = newValue;
     else if (unit === 's') currentS = newValue;
     
+    // Prevent negative values that might be typed before input clamps them
+    currentH = Math.max(0, currentH);
+    currentM = Math.max(0, currentM);
+    currentS = Math.max(0, currentS);
+
     setHours(currentH);
     setMinutes(currentM);
     setSeconds(currentS);
 
     const newTotalSeconds = currentH * 3600 + currentM * 60 + currentS;
-    const equivalentRawKsh = newTotalSeconds / 120; // 1 Ksh = 2 minutes = 120 seconds
+    const equivalentRawKsh = newTotalSeconds / 120; 
     setKshInput(equivalentRawKsh.toFixed(2));
   };
 
@@ -114,6 +117,17 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
       alert("Please set a duration greater than 0 seconds, or an amount greater than Ksh 0.");
       return;
     }
+    // The calculatedCost already reflects the Ksh 10 minimum if any time is set.
+    // We can add an explicit check for kshInput if desired, but calculatedCost is the billing truth.
+    const kshAmountFromInput = parseFloat(kshInput);
+    if (isNaN(kshAmountFromInput) || kshAmountFromInput < 10 && totalSecondsValue > 0) {
+       // This condition means they typed less than 10 (e.g. "5") but time is positive.
+       // calculatedCost will correctly be 10 or more.
+       // If we want to alert based on the kshInput field directly:
+       // alert("Minimum amount is Ksh 10.00. Your current settings will be billed at Ksh " + calculatedCost.toFixed(2) + ".");
+       // For now, proceeding as the billing logic is sound.
+    }
+
     onTimeSet(totalSecondsValue);
   };
 
@@ -164,8 +178,8 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
           onChange={handleKshInputChange}
           placeholder="e.g. 10.00"
           className="text-center text-2xl h-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-          min="0"
-          step="0.01" // Allows decimal input
+          min="10.00" // Set minimum amount
+          step="0.01" 
         />
       </div>
       
@@ -184,4 +198,3 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
 };
 
 export default CountdownSetup;
-
