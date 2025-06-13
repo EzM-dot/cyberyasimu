@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import CountdownSetup from '@/components/time-vault/CountdownSetup';
 import CountdownDisplay from '@/components/time-vault/CountdownDisplay';
 import FullScreenLock from '@/components/time-vault/FullScreenLock';
-import QrCodeDisplay from '@/components/time-vault/QrCodeDisplay';
+// import QrCodeDisplay from '@/components/time-vault/QrCodeDisplay'; // Removed import
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Timer, Smartphone } from 'lucide-react';
 
@@ -104,9 +104,7 @@ export default function HomePage() {
       <footer className="text-center mt-8 text-muted-foreground text-sm px-4">
         <p>Set your focus time. Lock it in. Make every second count.</p>
         <p className="text-xs mt-1">Billing: Ksh 10 per 20 minutes (or part thereof).</p>
-        <div className="mt-6">
-          <QrCodeDisplay size={96} />
-        </div>
+        {/* QR Code Display and associated text removed */}
       </footer>
     </main>
   );
