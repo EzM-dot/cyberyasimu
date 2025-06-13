@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
@@ -13,11 +14,13 @@ export default function HomePage() {
   const [phase, setPhase] = useState<AppPhase>('setup');
   const [duration, setDuration] = useState(0); // total seconds for the current countdown
   const [remainingTime, setRemainingTime] = useState(0); // current remaining seconds
+  const [isMinimized, setIsMinimized] = useState(false);
 
   const resetTimerState = useCallback(() => {
     setPhase('setup');
     setRemainingTime(0);
     setDuration(0);
+    setIsMinimized(false);
   }, []);
 
   useEffect(() => {
@@ -26,29 +29,28 @@ export default function HomePage() {
     if (phase === 'counting' && remainingTime > 0) {
       intervalId = setInterval(() => {
         setRemainingTime((prevTime) => {
-          if (prevTime <= 1) { // Timer will reach 0 on the next tick
-            clearInterval(intervalId!); // Clear interval immediately
-            setPhase('locked'); // Change phase
-            return 0; // Set remaining time to 0
+          if (prevTime <= 1) {
+            clearInterval(intervalId!);
+            setPhase('locked');
+            setIsMinimized(false); // Ensure full screen lock is not competing with minimized view
+            return 0;
           }
           return prevTime - 1;
         });
       }, 1000);
     } else if (phase === 'counting' && remainingTime === 0 && duration > 0) {
-      // This handles the case where timer might have been set to 0 initially or an edge case
       setPhase('locked');
+      setIsMinimized(false);
     }
 
-    // Cleanup function to clear interval when component unmounts or dependencies change
     return () => {
       if (intervalId) {
         clearInterval(intervalId);
       }
     };
-  }, [phase, remainingTime, duration]); // Dependencies for the effect
+  }, [phase, remainingTime, duration]);
 
   const handleTimeSet = (totalSeconds: number) => {
-    // Basic validation, already handled in CountdownSetup but good for safety
     if (totalSeconds <= 0) { 
       alert("Please set a duration greater than 0 seconds.");
       return;
@@ -56,6 +58,7 @@ export default function HomePage() {
     setDuration(totalSeconds);
     setRemainingTime(totalSeconds);
     setPhase('counting');
+    setIsMinimized(false); // Start in expanded view
   };
 
   const handleDismissLockScreen = () => {
@@ -66,12 +69,14 @@ export default function HomePage() {
     resetTimerState();
   };
 
-  // If phase is 'locked', render only the FullScreenLock component
+  const handleToggleMinimize = () => {
+    setIsMinimized(prev => !prev);
+  };
+
   if (phase === 'locked') {
     return <FullScreenLock onDismiss={handleDismissLockScreen} />;
   }
 
-  // Render setup or counting UI within the main layout
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-background text-foreground font-body">
       <Card className="w-full max-w-sm sm:max-w-md shadow-2xl rounded-xl overflow-hidden">
@@ -79,19 +84,22 @@ export default function HomePage() {
           <Timer className="w-12 h-12 text-primary mb-2" />
           <CardTitle className="font-headline text-3xl font-semibold">Time Vault</CardTitle>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="p-6 relative min-h-[300px]"> {/* Ensure CardContent can host the display */}
           {phase === 'setup' && <CountdownSetup onTimeSet={handleTimeSet} />}
           {phase === 'counting' && (
             <CountdownDisplay
               remainingTime={remainingTime}
               duration={duration}
               onReset={handleResetCountdown}
+              isMinimized={isMinimized}
+              onToggleMinimize={handleToggleMinimize}
             />
           )}
         </CardContent>
       </Card>
       <footer className="text-center mt-8 text-muted-foreground text-sm px-4">
         <p>Set your focus time. Lock it in. Make every second count.</p>
+        <p className="text-xs mt-1">Billing: Ksh 10 per 20 minutes (or part thereof).</p>
       </footer>
     </main>
   );

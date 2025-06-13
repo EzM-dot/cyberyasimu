@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { FC } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -15,12 +16,22 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(5); // Default to 5 minutes
   const [seconds, setSeconds] = useState(0);
+  const [calculatedCost, setCalculatedCost] = useState(0);
+
+  useEffect(() => {
+    const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+    if (totalSeconds <= 0) {
+      setCalculatedCost(0);
+    } else {
+      const twentyMinuteBlocks = Math.ceil(totalSeconds / (20 * 60));
+      setCalculatedCost(twentyMinuteBlocks * 10);
+    }
+  }, [hours, minutes, seconds]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const totalSeconds = hours * 3600 + minutes * 60 + seconds;
     if (totalSeconds <= 0) {
-      // Consider using toast for better UX in a real app
       alert("Please set a duration greater than 0 seconds.");
       return;
     }
@@ -39,10 +50,10 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
       <Input
         id={label.toLowerCase()}
         type="number"
-        value={value.toString()} // Ensure value is string for controlled input
+        value={value.toString()}
         onChange={(e) => {
           let val = parseInt(e.target.value, 10);
-          if (isNaN(val)) val = min; // Handle empty input or non-numeric
+          if (isNaN(val)) val = min;
           val = Math.max(min, Math.min(max, val));
           setValue(val);
         }}
@@ -54,7 +65,7 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
   );
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <p className="text-center text-muted-foreground">
         Set your focus duration.
       </p>
@@ -62,6 +73,10 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
         {createNumberInput("Hours", hours, setHours, 23)}
         {createNumberInput("Minutes", minutes, setMinutes, 59)}
         {createNumberInput("Seconds", seconds, setSeconds, 59)}
+      </div>
+      <div className="text-center p-2 bg-secondary/50 rounded-md">
+        <p className="text-sm font-medium text-secondary-foreground">Calculated Cost</p>
+        <p className="text-2xl font-semibold text-primary">Ksh {calculatedCost}</p>
       </div>
       <Button type="submit" className="w-full text-lg py-3 h-auto" size="lg">
         <PlayCircle className="mr-2 h-6 w-6" />
