@@ -17,7 +17,7 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
   const [minutes, setMinutes] = useState(5); // Default to 5 minutes
   const [seconds, setSeconds] = useState(0);
   const [calculatedCost, setCalculatedCost] = useState(0);
-  const [kshInput, setKshInput] = useState("10.00"); 
+  const [kshInput, setKshInput] = useState("0.00"); 
 
   // Effect to update calculatedCost when time (h, m, s) changes
   useEffect(() => {
@@ -30,21 +30,33 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
     setCalculatedCost(newBlockCost);
   }, [hours, minutes, seconds]);
 
-  // Effect to initialize kshInput based on default time
+  // Effect to initialize kshInput and calculatedCost based on default time
   useEffect(() => {
+    // Default time is already set by useState: hours(0), minutes(5), seconds(0)
     const initialTotalSeconds = hours * 3600 + minutes * 60 + seconds;
+    
     if (initialTotalSeconds > 0) {
-      const initialEquivalentKsh = initialTotalSeconds / 120; // 1 Ksh = 2 minutes = 120 seconds
-      setKshInput(initialEquivalentKsh.toFixed(2));
-      
+      const rawEquivalentKsh = initialTotalSeconds / 120;
       const twentyMinuteBlocks = Math.ceil(initialTotalSeconds / (20 * 60));
-      setCalculatedCost(twentyMinuteBlocks * 10);
+      const effectiveCost = twentyMinuteBlocks * 10;
+
+      setCalculatedCost(effectiveCost);
+
+      // If the effective cost for the default time is the minimum (10), 
+      // and the raw ksh equivalent is less than 10, display 10.00 in kshInput.
+      // This makes the initial display consistent with the minimum charge.
+      if (effectiveCost === 10 && rawEquivalentKsh < 10) {
+        setKshInput("10.00");
+      } else {
+        // Otherwise, kshInput shows the raw Ksh equivalent of the default time
+        setKshInput(rawEquivalentKsh.toFixed(2));
+      }
     } else {
-      setKshInput("0.00"); // Or "10.00" if 0 time implies min charge
-      setCalculatedCost(0); // Or 10
+      setKshInput("0.00");
+      setCalculatedCost(0);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only on mount to set initial kshInput from default time
+  }, []); // Run only on mount to set initial kshInput and cost from default time
 
 
   const handleKshInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,7 +107,6 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
     else if (unit === 'm') currentM = newValue;
     else if (unit === 's') currentS = newValue;
     
-    // Prevent negative values that might be typed before input clamps them
     currentH = Math.max(0, currentH);
     currentM = Math.max(0, currentM);
     currentS = Math.max(0, currentS);
@@ -105,8 +116,14 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
     setSeconds(currentS);
 
     const newTotalSeconds = currentH * 3600 + currentM * 60 + currentS;
-    const equivalentRawKsh = newTotalSeconds / 120; 
-    setKshInput(equivalentRawKsh.toFixed(2));
+    // When time changes, update kshInput to reflect the raw equivalent Ksh for that time.
+    // The calculatedCost field will show the actual block-based billing.
+    if (newTotalSeconds > 0) {
+        const equivalentRawKsh = newTotalSeconds / 120; 
+        setKshInput(equivalentRawKsh.toFixed(2));
+    } else {
+        setKshInput("0.00");
+    }
   };
 
 
@@ -118,15 +135,11 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
       return;
     }
     // The calculatedCost already reflects the Ksh 10 minimum if any time is set.
-    // We can add an explicit check for kshInput if desired, but calculatedCost is the billing truth.
-    const kshAmountFromInput = parseFloat(kshInput);
-    if (isNaN(kshAmountFromInput) || kshAmountFromInput < 10 && totalSecondsValue > 0) {
-       // This condition means they typed less than 10 (e.g. "5") but time is positive.
-       // calculatedCost will correctly be 10 or more.
-       // If we want to alert based on the kshInput field directly:
-       // alert("Minimum amount is Ksh 10.00. Your current settings will be billed at Ksh " + calculatedCost.toFixed(2) + ".");
-       // For now, proceeding as the billing logic is sound.
-    }
+    // The min="10.00" on kshInput helps with form validation.
+    // We can ensure that if kshInput is explicitly set below 10 by the user,
+    // but time is > 0, the submission still respects calculatedCost.
+    // The current logic already handles this as onTimeSet uses totalSecondsValue
+    // and calculatedCost determines the billing.
 
     onTimeSet(totalSecondsValue);
   };
@@ -178,7 +191,7 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
           onChange={handleKshInputChange}
           placeholder="e.g. 10.00"
           className="text-center text-2xl h-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-          min="10.00" // Set minimum amount
+          min="10.00" 
           step="0.01" 
         />
       </div>
@@ -198,3 +211,5 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
 };
 
 export default CountdownSetup;
+
+    
