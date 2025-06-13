@@ -1,6 +1,8 @@
+
 "use client";
 
 import type { FC } from 'react';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Hand } from 'lucide-react';
 
@@ -9,6 +11,18 @@ interface FullScreenLockProps {
 }
 
 const FullScreenLock: FC<FullScreenLockProps> = ({ onDismiss }) => {
+  useEffect(() => {
+    // Using a publicly available, royalty-free sound.
+    // This is a simple alarm clock sound from Google's sound library.
+    // Replace with any other non-copyrighted sound URL if desired.
+    const soundUrl = 'https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg';
+    const audio = new Audio(soundUrl);
+    audio.play().catch(error => {
+      console.error("Failed to play sound:", error);
+      // Optionally, inform the user that the sound couldn't play, though for a simple alert, console logging might be enough.
+    });
+  }, []); // Empty dependency array ensures this runs only once when the component mounts
+
   return (
     <div className="fixed inset-0 bg-primary z-[100] flex flex-col items-center justify-center text-primary-foreground p-4 sm:p-8 font-body">
       <div className="text-center">
