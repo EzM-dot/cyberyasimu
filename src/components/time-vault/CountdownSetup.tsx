@@ -179,7 +179,7 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <p className="text-center text-muted-foreground">
-        Set focus duration or enter amount.
+        weka masaa (time) ama weka pesa ya kulipa (or input amount to pay the owner of the phone)
       </p>
       
       <div className="grid grid-cols-3 gap-3 sm:gap-4">
@@ -217,3 +217,4 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
 };
 
 export default CountdownSetup;
+
