@@ -35,7 +35,7 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
 
   const handleKshInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setKshInput(value);
+    setKshInput(value); // Update kshInput to reflect user's typing immediately
 
     if (value === "") {
       setHours(0);
@@ -45,23 +45,23 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
       return;
     }
 
-    const amountNum = parseInt(value, 10);
+    const amountNum = parseFloat(value);
 
-    if (isNaN(amountNum) || amountNum < 0) {
-      // If input is not a valid non-negative number, set time to 0.
-      // This will also trigger the useEffect to set cost and kshInput to "0".
+    // If not a positive number, reset time.
+    // This will trigger useEffect to set cost to 0 and kshInput to "0".
+    if (isNaN(amountNum) || amountNum <= 0) {
       setHours(0);
       setMinutes(0);
       setSeconds(0);
       return;
     }
 
-    // Valid number: Calculate time from Ksh amount (Ksh 1 = 2 minutes)
+    // Valid positive number: Calculate time from Ksh amount (Ksh 1 = 2 minutes)
     const totalFocusSeconds = amountNum * 2 * 60;
     
     let newH = Math.floor(totalFocusSeconds / 3600);
     let newM = Math.floor((totalFocusSeconds % 3600) / 60);
-    let newS = totalFocusSeconds % 60;
+    let newS = Math.round(totalFocusSeconds % 60); // Round seconds
 
     // Cap time at 23:59:59 for sanity, aligning with H input max.
     if (newH >= 24) {
@@ -75,8 +75,8 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
     setSeconds(newS);
     // The useEffect for [hours, minutes, seconds] will then run,
     // recalculate the cost based on this new time, and update
-    // `calculatedCost` and `kshInput` (e.g., if user typed Ksh 15,
-    // time becomes 30min, block cost is Ksh 20, so kshInput becomes "20").
+    // `calculatedCost` and `kshInput` (e.g., if user typed Ksh 7.5,
+    // time becomes 15min, block cost is Ksh 10, so kshInput becomes "10").
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -134,9 +134,10 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
           type="number"
           value={kshInput}
           onChange={handleKshInputChange}
-          placeholder="e.g. 10"
+          placeholder="e.g. 10.00"
           className="text-center text-2xl h-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           min="0"
+          step="0.01"
         />
       </div>
       
