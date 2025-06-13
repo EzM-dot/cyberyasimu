@@ -192,20 +192,20 @@ const CountdownSetup: FC<CountdownSetupProps> = ({ onTimeSet }) => {
         <Label htmlFor="ksh-amount" className="text-sm font-medium text-muted-foreground">Amount (Ksh)</Label>
         <Input
           id="ksh-amount"
-          type="text" // Change to text to allow more control with regex, browser number spinners can be an issue
-          inputMode="decimal" // Hint for mobile keyboards
+          type="text" 
+          inputMode="decimal" 
           value={kshInput}
           onChange={handleKshInputChange}
           placeholder="e.g. 10.00"
           className="text-center text-2xl h-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-          min="10.00" // Still useful for semantic and some browser cues, though regex is primary
+          min="10.00" 
         />
       </div>
       
       <div className="text-center p-3 bg-secondary/50 rounded-md border border-secondary">
         <p className="text-sm font-medium text-secondary-foreground">Effective cost for this duration</p>
         <p className="text-2xl font-semibold text-primary">Ksh {calculatedCost.toFixed(2)}</p>
-        <p className="text-xs text-muted-foreground mt-1">Billing: Ksh 10 per 20 mins (or part thereof).</p>
+        <p className="text-xs text-muted-foreground mt-1">Billing: Ksh 10 per 20 mins (no negotiations bwana, sawa?).</p>
       </div>
       
       <Button type="submit" className="w-full text-lg py-3 h-auto" size="lg">
