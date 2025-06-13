@@ -6,7 +6,7 @@ import CountdownSetup from '@/components/time-vault/CountdownSetup';
 import CountdownDisplay from '@/components/time-vault/CountdownDisplay';
 import FullScreenLock from '@/components/time-vault/FullScreenLock';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Timer } from 'lucide-react';
+import { Timer, Smartphone } from 'lucide-react';
 
 type AppPhase = 'setup' | 'counting' | 'locked';
 
@@ -81,7 +81,10 @@ export default function HomePage() {
     <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-background text-foreground font-body">
       <Card className="w-full max-w-sm sm:max-w-md shadow-2xl rounded-xl overflow-hidden">
         <CardHeader className="items-center text-center bg-card pt-6 pb-4">
-          <Timer className="w-12 h-12 text-primary mb-2" />
+          <div className="flex items-center justify-center w-auto h-12 text-primary mb-2 space-x-1">
+            <Smartphone className="w-9 h-9" />
+            <Timer className="w-9 h-9" />
+          </div>
           <CardTitle className="font-headline text-3xl font-semibold">Cyber ya Simu</CardTitle>
         </CardHeader>
         <CardContent className="p-6 relative min-h-[300px]"> {/* Ensure CardContent can host the display */}
@@ -104,4 +107,3 @@ export default function HomePage() {
     </main>
   );
 }
-
