@@ -82,7 +82,7 @@ export default function HomePage() {
       <Card className="w-full max-w-sm sm:max-w-md shadow-2xl rounded-xl overflow-hidden">
         <CardHeader className="items-center text-center bg-card pt-6 pb-4">
           <Timer className="w-12 h-12 text-primary mb-2" />
-          <CardTitle className="font-headline text-3xl font-semibold">Time Vault</CardTitle>
+          <CardTitle className="font-headline text-3xl font-semibold">Cyber ya Simu</CardTitle>
         </CardHeader>
         <CardContent className="p-6 relative min-h-[300px]"> {/* Ensure CardContent can host the display */}
           {phase === 'setup' && <CountdownSetup onTimeSet={handleTimeSet} />}
@@ -104,3 +104,4 @@ export default function HomePage() {
     </main>
   );
 }
+
