@@ -5,68 +5,76 @@
 @layer base {
   :root {
     --background: 0 0% 94.1%; /* Light Gray #F0F0F0 */
-    --foreground: 275 25% 20%; /* Darker Purple-ish Gray for general text */
+    --foreground: 220 10% 25%; /* Neutral Dark Gray for general text */
 
     --green-gradient-start: 150 60% 65%; /* Light, pleasant green for gradient */
     --white-gradient-end: 0 0% 100%; /* Pure white for gradient end */
 
     --card: 0 0% 100%; /* White */
-    --card-foreground: 275 25% 20%; /* Darker Purple-ish Gray */
+    --card-foreground: 220 10% 25%; /* Neutral Dark Gray */
 
     --popover: 0 0% 100%; /* White */
-    --popover-foreground: 275 25% 20%;
+    --popover-foreground: 220 10% 25%; /* Neutral Dark Gray */
 
-    --primary: 275 82% 56%; /* Saturated Purple #9D34EB */
+    --primary: 210 80% 55%; /* Friendly Blue */
     --primary-foreground: 0 0% 100%; /* White */
 
-    --secondary: 275 30% 92%; /* Very Light Purple-Gray for secondary buttons etc. */
-    --secondary-foreground: 275 60% 45%; /* Mid-tone Purple for text on secondary */
+    --secondary: 210 30% 92%; /* Very Light Blue-Gray */
+    --secondary-foreground: 210 70% 45%; /* Mid-tone Blue for text on secondary */
 
-    --muted: 275 15% 88%; /* Lighter Purple-Gray for muted elements/text */
-    --muted-foreground: 275 10% 55%; /* Mid Purple-Gray for muted text */
+    --muted: 210 15% 88%; /* Lighter Blue-Gray for muted elements/text */
+    --muted-foreground: 210 10% 55%; /* Mid Blue-Gray for muted text */
 
-    --accent: 265 100% 75%; /* Soft Lavender #B882FF */
-    --accent-foreground: 275 50% 25%; /* Darker Purple for text on accent */
+    --accent: 200 85% 70%; /* Sky Blue / Light Teal */
+    --accent-foreground: 200 50% 25%; /* Darker Teal/Blue for text on accent */
 
     --destructive: 0 72% 51%; /* Default Red */
     --destructive-foreground: 0 0% 98%;
 
-    --border: 275 20% 85%; /* Light purple-gray border */
-    --input: 275 20% 90%; /* Slightly lighter than border for input backgrounds */
-    --ring: 275 82% 65%; /* Brighter/Lighter Primary for focus rings */
+    --border: 210 20% 85%; /* Light blue-gray border */
+    --input: 210 20% 90%; /* Slightly lighter than border for input backgrounds */
+    --ring: 210 80% 65%; /* Brighter/Lighter Blue for focus rings */
 
-    --radius: 0.75rem; /* Slightly more rounded for mobile feel */
+    --radius: 0.75rem;
 
-    --chart-1: 275 70% 50%;
-    --chart-2: 265 60% 65%;
-    --chart-3: 285 50% 45%;
-    --chart-4: 275 80% 70%;
-    --chart-5: 260 75% 60%;
+    --chart-1: 205 70% 50%; /* Nice Blue */
+    --chart-2: 195 60% 65%; /* Sky Blue / Light Cyan */
+    --chart-3: 215 50% 45%; /* Darker Blue / Indigo */
+    --chart-4: 200 80% 70%; /* Bright Light Blue */
+    --chart-5: 185 75% 60%; /* Teal/Aqua */
   }
 
   .dark {
-    /* Basic dark theme, can be expanded if needed */
-    --background: 275 15% 12%;
-    --foreground: 275 10% 85%;
+    --background: 220 15% 12%; /* Dark Blue-Gray */
+    --foreground: 210 10% 85%; /* Light Blue-Gray Text */
+
     --green-gradient-start: 150 50% 25%; /* Darker green for dark mode gradient */
-    --white-gradient-end: 275 15% 10%; /* Dark end for dark mode gradient */
-    --card: 275 15% 18%;
-    --card-foreground: 275 10% 85%;
-    --popover: 275 15% 18%;
-    --popover-foreground: 275 10% 85%;
-    --primary: 275 82% 60%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 275 20% 25%;
-    --secondary-foreground: 275 15% 75%;
-    --muted: 275 15% 22%;
-    --muted-foreground: 275 10% 60%;
-    --accent: 265 100% 70%;
-    --accent-foreground: 275 50% 20%;
+    --white-gradient-end: 220 15% 10%; /* Dark Blue-Gray end for dark mode gradient */
+
+    --card: 220 15% 18%; /* Darker Blue-Gray */
+    --card-foreground: 210 10% 85%; /* Light Blue-Gray Text */
+
+    --popover: 220 15% 18%; /* Darker Blue-Gray */
+    --popover-foreground: 210 10% 85%; /* Light Blue-Gray Text */
+
+    --primary: 210 80% 60%; /* Friendly Blue (Dark Mode) */
+    --primary-foreground: 0 0% 100%; /* White */
+
+    --secondary: 210 20% 25%; /* Dark Blue-Gray */
+    --secondary-foreground: 210 15% 75%; /* Light Blue-Gray Text */
+
+    --muted: 210 15% 22%; /* Darker Blue-Gray */
+    --muted-foreground: 210 10% 60%; /* Gray-Blue Text */
+
+    --accent: 200 85% 65%; /* Sky Blue / Light Teal (Dark Mode) */
+    --accent-foreground: 200 30% 80%; /* Light Teal Text */
+
     --destructive: 0 63% 40%;
     --destructive-foreground: 0 0% 98%;
-    --border: 275 15% 30%;
-    --input: 275 15% 28%;
-    --ring: 275 82% 70%;
+
+    --border: 210 15% 30%; /* Dark Blue-Gray Border */
+    --input: 210 15% 28%; /* Dark Blue-Gray Input */
+    --ring: 210 80% 70%; /* Brighter Blue Ring */
   }
 }
 
