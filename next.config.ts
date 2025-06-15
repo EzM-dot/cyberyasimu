@@ -1,23 +1,12 @@
-import type {NextConfig} from 'next';
+import { CapacitorConfig } from '@capacitor/cli';
 
-const nextConfig: NextConfig = {
-  /* config options here */
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'placehold.co',
-        port: '',
-        pathname: '/**',
-      },
-    ],
-  },
+const config: CapacitorConfig = {
+  appId: 'your.inksolves.cyberyasimu',
+  appName: 'CyberYaSimu',
+  webDir: 'out',
+  server: {
+    androidScheme: 'https'
+  }
 };
 
-export default nextConfig;
+export default config;

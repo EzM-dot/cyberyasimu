@@ -1,26 +1,20 @@
-
 import type { Metadata } from 'next';
+import { ReactNode } from 'react';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: 'Cyber ya Simu',
   description: 'Countdown and lock your focus.',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
 };
 
-// Interface for the layout props, explicitly including params
 interface RootLayoutProps {
-  children: React.ReactNode;
-  params: { [key: string]: string | string[] | undefined }; // Explicitly type params
+  children: ReactNode;
 }
 
 export default function RootLayout({
   children,
-  params, // Destructure params, even if not directly used in the body
-}: Readonly<RootLayoutProps>) {
-  // By destructuring 'params', we acknowledge its presence, which can help
-  // Next.js internals or dev tools that might be probing component props.
+}: RootLayoutProps) {
   return (
     <html lang="en">
       <head>
